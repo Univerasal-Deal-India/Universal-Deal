@@ -1,0 +1,10 @@
+{
+  "name": "Universal Deal",
+  "short_name": "Universal Deal",
+  "description": "Buyer-led negotiation marketplace prototype",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7f4",
+  "theme_color": "#132d26",
+  "icons": []
+}

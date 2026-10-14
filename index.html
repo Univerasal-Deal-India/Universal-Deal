@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#132d26">
+<link rel="manifest" href="manifest.json">
+<title>Universal Deal</title>
+<style>
+:root{--ink:#132d26;--mint:#b7f7d0;--paper:#f5f7f4;--line:#dce4de;--muted:#637169;--white:#fff;--orange:#f1b86a}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--paper);color:#17251e}
+header{background:var(--ink);color:white;padding:20px 16px 18px;border-radius:0 0 24px 24px}
+.head{max-width:900px;margin:auto;display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:14px;background:var(--mint);color:var(--ink);display:grid;place-items:center;font-size:25px;font-weight:900}
+h1{font-size:23px;margin:0}header p{margin:4px 0 0;color:#d7e8dd;font-size:13px}.wrap{max-width:900px;margin:0 auto;padding:16px}
+.toprow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px}
+select,input,textarea,button{font:inherit}select,input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:white;color:#17251e}
+button{border:0;border-radius:11px;padding:11px 14px;background:var(--ink);color:white;font-weight:700;cursor:pointer}button.secondary{background:#e5eee7;color:var(--ink)}button.warn{background:#fff0dc;color:#6b420b}.small{font-size:12px;color:var(--muted)}.notice{padding:11px 12px;border:1px solid #f0d4a8;background:#fff8eb;border-radius:12px;font-size:12px;line-height:1.45;margin-bottom:14px}
+.tabs{display:flex;gap:7px;overflow:auto;padding-bottom:4px;margin-bottom:14px}.tab{white-space:nowrap;background:#e5eee7;color:var(--ink)}.tab.active{background:var(--ink);color:white}
+.panel{background:white;border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:14px}.panel h2{font-size:17px;margin:0 0 12px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}label{font-size:12px;color:var(--muted);font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:12px}.deal{background:white;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:9px}.deal h3{margin:0;font-size:16px}.pill{display:inline-flex;background:#e9f5ed;color:#21583b;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:700;align-self:flex-start}.price{font-size:20px;font-weight:800}.muted{color:var(--muted);font-size:12px}.row{display:flex;justify-content:space-between;gap:8px;align-items:center}.deal-actions{display:flex;gap:7px;flex-wrap:wrap}.deal-actions button{font-size:12px;padding:9px 10px}.empty{text-align:center;padding:25px;color:var(--muted)}.hidden{display:none!important}.offer{border-top:1px solid var(--line);padding-top:10px;margin-top:5px}.offer input{margin:5px 0}.stat{display:inline-block;background:#f1f5f1;border-radius:10px;padding:8px 10px;font-size:12px;margin:3px 3px 3px 0}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:15px}
+@media(max-width:520px){.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.wrap{padding:12px}header{padding:17px 14px}}
+</style>
+</head>
+<body>
+<header><div class="head"><div class="logo">UD</div><div><h1>Universal Deal</h1><p id="tagline">One platform. Every deal. / Har deal ek jagah.</p></div></div></header>
+<main class="wrap">
+<div class="toprow"><div><strong id="welcome">Make a deal, your way.</strong><div class="small" id="subwelcome">Browse, offer, negotiate.</div></div><div style="width:145px"><select id="lang" aria-label="Language"><option value="en">English</option><option value="hi">हिन्दी</option></select></div></div>
+<div class="notice"><strong>Demo mode:</strong> Listings and offers are saved only in this browser on this device. No real accounts, online syncing, escrow or payments are active. Commission shown is an example, not a charge.</div>
+<div class="tabs" role="tablist">
+<button class="tab active" data-tab="browse" id="tabBrowse">Browse deals</button>
+<button class="tab" data-tab="create" id="tabCreate">Post a deal</button>
+<button class="tab" data-tab="my" id="tabMy">My activity</button>
+</div>
+<section id="browse" class="panel">
+<div class="row" style="margin-bottom:12px"><h2 id="browseTitle">Explore all categories</h2><span class="small" id="count"></span></div>
+<div class="formgrid" style="margin-bottom:12px">
+<div class="field"><label id="catLabel" for="filterCat">CATEGORY</label><select id="filterCat"></select></div>
+<div class="field"><label id="searchLabel" for="search">SEARCH</label><input id="search" placeholder="Search title or description"></div>
+</div>
+<div id="dealList" class="cards"></div>
+</section>
+<section id="create" class="panel hidden">
+<h2 id="createTitle">Post a seller deal</h2>
+<form id="dealForm" class="formgrid">
+<div class="field full"><label id="titleLabel" for="title">DEAL TITLE</label><input id="title" required maxlength="90" placeholder="e.g. Used laptop, tutoring, rental room"></div>
+<div class="field"><label id="categoryLabel" for="category">CATEGORY</label><select id="category" required></select></div>
+<div class="field"><label id="sellerLabel" for="seller">SELLER NAME / ALIAS</label><input id="seller" required maxlength="40" placeholder="e.g. Seller123"></div>
+<div class="field"><label id="priceLabel" for="price">Listed price (₹)</label><input id="price" type="number" min="1" step="1" required></div>
+<div class="field"><label id="minLabel" for="minimum">Seller minimum price (₹)</label><input id="minimum" type="number" min="1" step="1" required></div>
+<div class="field full"><label id="descLabel" for="description">DESCRIPTION</label><textarea id="description" rows="3" maxlength="500" placeholder="Condition, location (optional), terms..."></textarea></div>
+<div class="field full"><label id="commissionLabel" for="commission">Illustrative buyer commission (%)</label><input id="commission" type="number" min="0" max="20" step="0.5" value="2" required><span class="small" id="commissionHelp">Displayed transparently; no payment is collected.</span></div>
+<div class="field full"><button type="submit" id="publish">Publish demo listing</button></div>
+</form>
+</section>
+<section id="my" class="panel hidden">
+<div class="row"><h2 id="myTitle">My activity on this device</h2><button class="secondary" id="exportBtn" type="button">Export JSON</button></div>
+<p class="small" id="myHelp">This demo has no verified identity. Use an alias only; do not post private information.</p>
+<div id="myList"></div>
+<button class="warn" id="resetBtn" type="button">Reset demo data</button>
+</section>
+<footer>Universal Deal MVP · Prototype only · Never pay based only on a demo listing.</footer>
+</main>
+<script>
+const CATS = [
+ ["all","All categories","सभी श्रेणियाँ"],["electronics","Electronics","इलेक्ट्रॉनिक्स"],["vehicles","Vehicles","वाहन"],
+ ["property","Property & Rentals","प्रॉपर्टी और किराया"],["services","Services & Skills","सेवाएँ और कौशल"],
+ ["home","Home & Furniture","घर और फर्नीचर"],["fashion","Fashion","फैशन"],["jobs","Jobs & Gigs","नौकरी और छोटे काम"],
+ ["education","Education","शिक्षा"],["agriculture","Agriculture","कृषि"],["business","Business & Wholesale","व्यापार और थोक"],
+ ["other","Other","अन्य"]
+];
+const TEXT = {
+ en:{welcome:"Make a deal, your way.",subwelcome:"Browse, offer, negotiate.",browse:"Browse deals",post:"Post a deal",activity:"My activity",browseTitle:"Explore all categories",cat:"CATEGORY",search:"SEARCH",searchph:"Search title or description",createTitle:"Post a seller deal",title:"DEAL TITLE",category:"CATEGORY",seller:"SELLER NAME / ALIAS",price:"Listed price (₹)",min:"Seller minimum price (₹)",desc:"DESCRIPTION",commissionLabel:"Illustrative buyer commission (%)",commissionHelp:"Displayed transparently; no payment is collected.",publish:"Publish demo listing",myTitle:"My activity on this device",myHelp:"This demo has no verified identity. Use an alias only; do not post private information.",export:"Export JSON",reset:"Reset demo data",listed:"Listed",minimum:"Seller minimum",commissionFee:"Buyer commission",buyerTotal:"Example buyer total",offer:"Make offer",accept:"Accept offer",counter:"Counteroffer",delete:"Delete",noDeals:"No listings yet. Post the first demo deal.",offerPrompt:"Your offer amount (₹)",counterPrompt:"Counteroffer amount (₹)",offerSent:"Offer saved on this device.",acceptMsg:"Offer marked accepted in this local demo.",status:"Status",offers:"Offers",posted:"Posted",active:"Active",accepted:"Accepted",countered:"Countered",buyer:"Buyer alias",noOffers:"No offers yet.",invalid:"Minimum price cannot be greater than listed price.",resetConfirm:"Delete all local demo listings and offers?",noActivity:"No activity yet.",exportDone:"Export file prepared by browser.",demo:"Demo listing",listedBy:"Listed by",description:"Description"},
+ hi:{welcome:"Apni sharton par deal karein.",subwelcome:"Dekhein, offer dein, negotiation karein.",browse:"Deals dekhein",post:"Deal post karein",activity:"Meri activity",browseTitle:"Sabhi categories dekhein",cat:"CATEGORY",search:"SEARCH",searchph:"Title ya description search karein",createTitle:"Seller deal post karein",title:"DEAL KA TITLE",category:"CATEGORY",seller:"SELLER KA NAAM / ALIAS",price:"Listed price (₹)",min:"Seller ki minimum price (₹)",desc:"DESCRIPTION",commissionLabel:"Buyer commission (example %)",commissionHelp:"Commission sirf dikhaya ja raha hai; koi payment nahi li jaati.",publish:"Demo listing publish karein",myTitle:"Is device par meri activity",myHelp:"Is demo mein identity verify nahi hoti. Sirf alias use karein; private information na daalein.",export:"JSON export",reset:"Demo data reset karein",listed:"Listed price",minimum:"Seller minimum",commissionFee:"Buyer commission",buyerTotal:"Buyer ka example total",offer:"Offer dein",accept:"Offer accept karein",counter:"Counteroffer",delete:"Delete",noDeals:"Abhi listing nahi hai. Pehli demo deal post karein.",offerPrompt:"Apna offer amount (₹)",counterPrompt:"Counteroffer amount (₹)",offerSent:"Offer isi device par save ho gaya.",acceptMsg:"Offer local demo mein accepted mark hua.",status:"Status",offers:"Offers",posted:"Post kiya",active:"Active",accepted:"Accepted",countered:"Countered",buyer:"Buyer alias",noOffers:"Abhi koi offer nahi.",invalid:"Minimum price, listed price se zyada nahi ho sakti.",resetConfirm:"Saari local demo listings aur offers delete karein?",noActivity:"Abhi activity nahi hai.",exportDone:"Browser ne export file taiyar ki.",demo:"Demo listing",listedBy:"Seller",description:"Description"}
+};
+let lang="en", tab="browse";
+const $=id=>document.getElementById(id);
+const t=k=>TEXT[lang][k]||TEXT.en[k]||k;
+const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(Number(n)||0);
+function load(){try{return JSON.parse(localStorage.getItem("ud_demo_v1")||"[]")}catch{return []}}
+function save(items){localStorage.setItem("ud_demo_v1",JSON.stringify(items))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function catName(id){let c=CATS.find(x=>x[0]===id);return c?(lang==="hi"?c[2]:c[1]):id}
+function fillCats(){["filterCat","category"].forEach(id=>{let sel=$(id),prev=sel.value;sel.innerHTML="";CATS.filter(c=>id!=="category"||c[0]!=="all").forEach(c=>{let o=document.createElement("option");o.value=c[0];o.textContent=lang==="hi"?c[2]:c[1];sel.append(o)});if([...sel.options].some(o=>o.value===prev))sel.value=prev})}
+function applyLanguage(){
+document.documentElement.lang=lang==="hi"?"hi":"en";
+$("welcome").textContent=t("welcome");$("subwelcome").textContent=t("subwelcome");
+$("tabBrowse").textContent=t("browse");$("tabCreate").textContent=t("post");$("tabMy").textContent=t("activity");
+$("browseTitle").textContent=t("browseTitle");$("catLabel").textContent=t("cat");$("searchLabel").textContent=t("search");$("search").placeholder=t("searchph");
+$("createTitle").textContent=t("createTitle");$("titleLabel").textContent=t("title");$("categoryLabel").textContent=t("category");$("sellerLabel").textContent=t("seller");$("priceLabel").textContent=t("price");$("minLabel").textContent=t("min");$("descLabel").textContent=t("desc");$("commissionLabel").textContent=t("commission");$("commissionHelp").textContent=t("commissionHelp");$("publish").textContent=t("publish");
+$("myTitle").textContent=t("myTitle");$("myHelp").textContent=t("myHelp");$("exportBtn").textContent=t("export");$("resetBtn").textContent=t("reset");fillCats();render()}
+function switchTab(name){tab=name;document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));["browse","create","my"].forEach(id=>$(id).classList.toggle("hidden",id!==name));if(name==="my")renderMy()}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+function render(){
+let all=load(),cat=$("filterCat").value||"all",q=$("search").value.trim().toLowerCase();
+let list=all.filter(d=>(cat==="all"||d.category===cat)&&(!q||(d.title+" "+d.description+" "+d.seller).toLowerCase().includes(q))).reverse();
+$("count").textContent=list.length+"";
+$("dealList").innerHTML=list.length?list.map(d=>{
+let com=d.price*d.commission/100,offers=(d.offers||[]);
+return `<article class="deal"><span class="pill">${esc(catName(d.category))}</span><h3>${esc(d.title)}</h3><div class="muted">${esc(t("listedBy"))}: ${esc(d.seller)}</div><div class="price">${money(d.price)}</div><div class="muted">${esc(d.description||"—")}</div><div class="stat">${esc(t("minimum"))}: ${money(d.minimum)}</div><div class="stat">${esc(t("commissionFee"))}: ${d.commission}%</div><div class="stat">${esc(t("buyerTotal"))}: ${money(d.price+com)}</div><div class="muted">${esc(t("status"))}: ${esc(d.status||t("active"))} · ${offers.length} ${esc(t("offers").toLowerCase())}</div><div class="deal-actions"><button onclick="makeOffer('${d.id}')">${esc(t("offer"))}</button><button class="secondary" onclick="viewOffers('${d.id}')">${esc(t("offers"))}</button></div></article>`
+}).join(""):`<div class="empty">${esc(t("noDeals"))}</div>`;
+}
+function makeOffer(id){
+let items=load(),d=items.find(x=>x.id===id);if(!d)return;
+let buyer=prompt(t("buyer")+"?");if(!buyer||!buyer.trim())return;
+let amount=Number(prompt(t("offerPrompt"),String(d.price)));if(!Number.isFinite(amount)||amount<=0){alert("Enter a valid amount.");return}
+d.offers=d.offers||[];d.offers.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),buyer:buyer.trim(),amount,status:"Pending",created:new Date().toISOString()});save(items);alert(t("offerSent"));render()
+}
+function viewOffers(id){
+let items=load(),d=items.find(x=>x.id===id);if(!d)return;let offers=d.offers||[];
+if(!offers.length){alert(t("noOffers"));return}
+let menu=offers.map((o,i)=>`${i+1}. ${o.buyer}: ${money(o.amount)} — ${o.status}`).join("\n");
+let chosen=Number(prompt(menu+"\n\nEnter offer number to manage:"));if(!chosen||chosen<1||chosen>offers.length)return;
+let o=offers[chosen-1],action=prompt("Type A to accept, C to counter, X to cancel");
+if(action&&action.toLowerCase()==="a"){if(o.amount<d.minimum){alert("Offer is below seller minimum. You can counter instead.");return}o.status="Accepted";d.status="Deal agreed (demo)";save(items);alert(t("acceptMsg"))}
+else if(action&&action.toLowerCase()==="c"){let n=Number(prompt(t("counterPrompt"),String(d.minimum)));if(n>0){o.counter=n;o.status="Countered";save(items);alert(t("offerSent"))}}
+render()
+}
+$("dealForm").addEventListener("submit",e=>{
+e.preventDefault();let price=Number($("price").value),minimum=Number($("minimum").value),commission=Number($("commission").value);
+if(minimum>price){alert(t("invalid"));return}
+if(price<=0||minimum<=0||commission<0||commission>20){alert("Check price and commission values.");return}
+let items=load();items.push({id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),title:$("title").value.trim(),category:$("category").value,seller:$("seller").value.trim(),price,minimum,description:$("description").value.trim(),commission,offers:[],status:t("active"),created:new Date().toISOString()});
+save(items);e.target.reset();$("commission").value=2;switchTab("browse");render()
+});
+$("filterCat").addEventListener("change",render);$("search").addEventListener("input",render);
+function renderMy(){let items=load().slice().reverse();$("myList").innerHTML=items.length?items.map(d=>`<div class="offer"><strong>${esc(d.title)}</strong><div class="muted">${esc(catName(d.category))} · ${money(d.price)} · ${esc(d.seller)}</div><div class="muted">${(d.offers||[]).length} ${esc(t("offers").toLowerCase())}</div><button class="warn" onclick="deleteDeal('${d.id}')">${esc(t("delete"))}</button></div>`).join(""):`<div class="empty">${esc(t("noActivity"))}</div>`}
+function deleteDeal(id){if(!confirm(t("delete")+"?"))return;save(load().filter(d=>d.id!==id));renderMy();render()}
+$("resetBtn").addEventListener("click",()=>{if(confirm(t("resetConfirm"))){localStorage.removeItem("ud_demo_v1");render();renderMy()}});
+$("exportBtn").addEventListener("click",()=>{let blob=new Blob([JSON.stringify(load(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="universal-deal-demo.json";a.click();URL.revokeObjectURL(url)});
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+applyLanguage();$("lang").addEventListener("change",e=>{lang=e.target.value;applyLanguage()});
+</script>
+</body>
+</html>
