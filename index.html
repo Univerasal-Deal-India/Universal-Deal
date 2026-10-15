@@ -64,8 +64,7 @@
     const status = document.getElementById("status");
     const listingBox = document.getElementById("listings");
 
-    if (window.supabase &&
-        SUPABASE_PUBLISHABLE_KEY !== "sb_publishable_PbczD25Us5legTp0SnCojw_AxiScFOF") {
+    if (window.supabase) {
       db = window.supabase.createClient(
         SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY
       );
